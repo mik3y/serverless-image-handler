@@ -7,3 +7,4 @@
 * Removed usage metrics reporting.
 * Removed the additional `custom-resource` lambda.
 * Use `yarn`.
+* Use `eslint`.
