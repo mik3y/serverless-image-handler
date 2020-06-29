@@ -67,22 +67,9 @@ npm run build
 cp dist/image-handler.zip $build_dist_dir/image-handler.zip
 
 echo "------------------------------------------------------------------------------"
-echo "Package the demo-ui assets"
-echo "------------------------------------------------------------------------------"
-mkdir $build_dist_dir/demo-ui/
-cp -r $source_dir/demo-ui/** $build_dist_dir/demo-ui/
-
-echo "------------------------------------------------------------------------------"
 echo "Package the custom-resource code"
 echo "------------------------------------------------------------------------------"
 cd $source_dir/custom-resource
 npm install
 npm run build
 cp dist/custom-resource.zip $build_dist_dir/custom-resource.zip
-
-echo "------------------------------------------------------------------------------"
-echo "Generate the demo-ui manifest document"
-echo "------------------------------------------------------------------------------"
-cd $template_dir/manifest-generator
-npm install
-node app.js --target ../../source/demo-ui --output $build_dist_dir/demo-ui-manifest.json
