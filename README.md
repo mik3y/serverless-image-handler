@@ -11,3 +11,4 @@ The primary goal of this fork is to make the upstream project simpler to maintai
 Major changes:
 
 * Removed the demo UI.
+* Removed usage metrics reporting.

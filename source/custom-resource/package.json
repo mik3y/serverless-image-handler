@@ -8,9 +8,7 @@
     "version": "0.0.1",
     "private": true,
     "dependencies": {
-        "moment": "^2.24.0",
-        "uuid": "^3.3.3",
-        "usage-metrics": "file:lib/usage-metrics/"
+        "moment": "^2.24.0"
     },
     "devDependencies": {
         "aws-sdk": "*",
@@ -30,8 +28,7 @@
         "build": "npm run build:init && npm install --production && npm run build:zip && npm run build:dist"
     },
     "bundledDependencies": [
-        "moment",
-        "uuid"
+        "moment"
     ],
     "license": "Apache-2.0"
 }

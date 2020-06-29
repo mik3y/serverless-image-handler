@@ -15,13 +15,9 @@
 
 console.log('Loading function');
 
-const AWS = require('aws-sdk');
 const https = require('https');
 const url = require('url');
-const moment = require('moment');
 const S3Helper = require('./lib/s3-helper.js');
-const UsageMetrics = require('./lib/usage-metrics');
-const uuidv4 = require('uuid/v4');
 
 /**
  * Request handler.
@@ -33,39 +29,7 @@ exports.handler = (event, context, callback) => {
     let responseData = {};
 
     if (event.RequestType === 'Delete') {
-        if (event.ResourceProperties.customAction === 'sendMetric') {
-            responseStatus = 'SUCCESS';
-
-            if (event.ResourceProperties.anonymousData === 'Yes') {
-                let _metric = {
-                    Solution: event.ResourceProperties.solutionId,
-                    UUID: event.ResourceProperties.UUID,
-                    TimeStamp: moment().utc().format('YYYY-MM-DD HH:mm:ss.S'),
-                    Data: {
-                        Version: event.ResourceProperties.version,
-                        Deleted: moment().utc().format()
-                    }
-                };
-
-                let _usageMetrics = new UsageMetrics();
-                _usageMetrics.sendAnonymousMetric(_metric).then((data) => {
-                    console.log(data);
-                    console.log('Annonymous metrics successfully sent.');
-                    sendResponse(event, callback, context.logStreamName, responseStatus, responseData);
-                }).catch((err) => {
-                    responseData = {
-                        Error: 'Sending anonymous delete metric failed'
-                    };
-                    console.log([responseData.Error, ':\n', err].join(''));
-                    sendResponse(event, callback, context.logStreamName, responseStatus, responseData);
-                });
-            } else {
-                sendResponse(event, callback, context.logStreamName, 'SUCCESS');
-            }
-
-        } else {
-            sendResponse(event, callback, context.logStreamName, 'SUCCESS');
-        }
+        sendResponse(event, callback, context.logStreamName, 'SUCCESS');
     }
 
     if (event.RequestType === 'Create') {
@@ -101,13 +65,6 @@ exports.handler = (event, context, callback) => {
                 sendResponse(event, callback, context.logStreamName, responseStatus, responseData);
             });
 
-        } else if (event.ResourceProperties.customAction === 'createUuid') {
-            responseStatus = 'SUCCESS';
-            responseData = {
-                UUID: uuidv4()
-            };
-            sendResponse(event, callback, context.logStreamName, responseStatus, responseData);
-
         } else if (event.ResourceProperties.customAction === 'checkSourceBuckets') {
             let _s3Helper = new S3Helper();
 
@@ -124,31 +81,6 @@ exports.handler = (event, context, callback) => {
             });
 
         } else if (event.ResourceProperties.customAction === 'sendMetric') {
-            if (event.ResourceProperties.anonymousData === 'Yes') {
-                let _metric = {
-                    Solution: event.ResourceProperties.solutionId,
-                    UUID: event.ResourceProperties.UUID,
-                    TimeStamp: moment().utc().format('YYYY-MM-DD HH:mm:ss.S'),
-                    Data: {
-                        Version: event.ResourceProperties.version,
-                        Launch: moment().utc().format()
-                    }
-                };
-
-                let _usageMetrics = new UsageMetrics();
-                _usageMetrics.sendAnonymousMetric(_metric).then((data) => {
-                    console.log(data);
-                    console.log('Annonymous metrics successfully sent.');
-                }).catch((err) => {
-                    console.log(`Sending anonymous launch metric failed: ${err}`);
-                });
-
-                sendResponse(event, callback, context.logStreamName, 'SUCCESS', {});
-            } else {
-                sendResponse(event, callback, context.logStreamName, 'SUCCESS');
-            }
-
-        } else {
             sendResponse(event, callback, context.logStreamName, 'SUCCESS');
         }
     }
