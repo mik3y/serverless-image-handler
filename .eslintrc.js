@@ -5,15 +5,9 @@ module.exports = {
     es6: true,
     mocha: true,
   },
-  extends: [
-    'airbnb-base',
-    'prettier',
-  ],
+  extends: ["airbnb-base", "prettier"],
   rules: {
-    'prettier/prettier': 'error',
+    "prettier/prettier": "error",
   },
-  plugins: [
-    'mocha',
-    'prettier',
-  ],
+  plugins: ["mocha", "prettier"],
 };

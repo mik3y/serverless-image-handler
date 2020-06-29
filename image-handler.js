@@ -11,14 +11,14 @@
  *  and limitations under the License.                                                                                *
  ******************************************************************************************************************** */
 
-const AWS = require('aws-sdk');
-const sharp = require('sharp');
+const AWS = require("aws-sdk");
+const sharp = require("sharp");
 
 class ImageHandler {
   /**
-     * Main method for processing image requests and outputting modified images.
-     * @param {ImageRequest} request - An ImageRequest object.
-     */
+   * Main method for processing image requests and outputting modified images.
+   * @param {ImageRequest} request - An ImageRequest object.
+   */
   async process(request) {
     const { originalImage } = request;
     const { edits } = request;
@@ -28,21 +28,21 @@ class ImageHandler {
         modifiedImage.toFormat(request.outputFormat);
       }
       const bufferImage = await modifiedImage.toBuffer();
-      return bufferImage.toString('base64');
+      return bufferImage.toString("base64");
     }
-    return originalImage.toString('base64');
+    return originalImage.toString("base64");
   }
 
   /**
-     * Applies image modifications to the original image based on edits
-     * specified in the ImageRequest.
-     * @param {Buffer} originalImage - The original image.
-     * @param {Object} edits - The edits to be made to the original image.
-     */
+   * Applies image modifications to the original image based on edits
+   * specified in the ImageRequest.
+   * @param {Buffer} originalImage - The original image.
+   * @param {Object} edits - The edits to be made to the original image.
+   */
   async applyEdits(originalImage, edits) {
     if (edits.resize === undefined) {
       edits.resize = {};
-      edits.resize.fit = 'inside';
+      edits.resize.fit = "inside";
     }
 
     const image = sharp(originalImage, { failOnError: false });
@@ -54,29 +54,39 @@ class ImageHandler {
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       const value = values[i];
-      if (key === 'overlayWith') {
+      if (key === "overlayWith") {
         let imageMetadata = metadata;
         if (edits.resize) {
           const imageBuffer = await image.toBuffer();
-          imageMetadata = await sharp(imageBuffer).resize({ edits: { resize: edits.resize } }).metadata();
+          imageMetadata = await sharp(imageBuffer)
+            .resize({ edits: { resize: edits.resize } })
+            .metadata();
         }
 
-        const {
-          bucket, key, wRatio, hRatio, alpha,
-        } = value;
-        const overlay = await this.getOverlayImage(bucket, key, wRatio, hRatio, alpha, imageMetadata);
+        const { bucket, key, wRatio, hRatio, alpha } = value;
+        const overlay = await this.getOverlayImage(
+          bucket,
+          key,
+          wRatio,
+          hRatio,
+          alpha,
+          imageMetadata
+        );
         const overlayMetadata = await sharp(overlay).metadata();
 
         const { options } = value;
         if (options) {
           if (options.left) {
             let { left } = options;
-            if (left.endsWith('p')) {
-              left = parseInt(left.replace('p', ''));
+            if (left.endsWith("p")) {
+              left = parseInt(left.replace("p", ""));
               if (left < 0) {
-                left = imageMetadata.width + (imageMetadata.width * left / 100) - overlayMetadata.width;
+                left =
+                  imageMetadata.width +
+                  (imageMetadata.width * left) / 100 -
+                  overlayMetadata.width;
               } else {
-                left = imageMetadata.width * left / 100;
+                left = (imageMetadata.width * left) / 100;
               }
             } else {
               left = parseInt(left);
@@ -88,12 +98,15 @@ class ImageHandler {
           }
           if (options.top) {
             let { top } = options;
-            if (top.endsWith('p')) {
-              top = parseInt(top.replace('p', ''));
+            if (top.endsWith("p")) {
+              top = parseInt(top.replace("p", ""));
               if (top < 0) {
-                top = imageMetadata.height + (imageMetadata.height * top / 100) - overlayMetadata.height;
+                top =
+                  imageMetadata.height +
+                  (imageMetadata.height * top) / 100 -
+                  overlayMetadata.height;
               } else {
-                top = imageMetadata.height * top / 100;
+                top = (imageMetadata.height * top) / 100;
               }
             } else {
               top = parseInt(top);
@@ -107,19 +120,23 @@ class ImageHandler {
 
         const params = [{ ...options, input: overlay }];
         image.composite(params);
-      } else if (key === 'smartCrop') {
+      } else if (key === "smartCrop") {
         const options = value;
         const imageBuffer = await image.toBuffer();
-        const boundingBox = await this.getBoundingBox(imageBuffer, options.faceIndex);
+        const boundingBox = await this.getBoundingBox(
+          imageBuffer,
+          options.faceIndex
+        );
         const cropArea = this.getCropArea(boundingBox, options, metadata);
         try {
           image.extract(cropArea);
         } catch (err) {
-          throw ({
+          throw {
             status: 400,
-            code: 'SmartCrop::PaddingOutOfBounds',
-            message: 'The padding value you provided exceeds the boundaries of the original image. Please try choosing a smaller value or applying padding via Sharp for greater specificity.',
-          });
+            code: "SmartCrop::PaddingOutOfBounds",
+            message:
+              "The padding value you provided exceeds the boundaries of the original image. Please try choosing a smaller value or applying padding via Sharp for greater specificity.",
+          };
         }
       } else {
         image[key](value);
@@ -130,28 +147,35 @@ class ImageHandler {
   }
 
   /**
-     * Gets an image to be used as an overlay to the primary image from an
-     * Amazon S3 bucket.
-     * @param {string} bucket - The name of the bucket containing the overlay.
-     * @param {string} key - The keyname corresponding to the overlay.
-     */
-  async getOverlayImage(bucket, key, wRatio, hRatio, alpha, sourceImageMetadata) {
+   * Gets an image to be used as an overlay to the primary image from an
+   * Amazon S3 bucket.
+   * @param {string} bucket - The name of the bucket containing the overlay.
+   * @param {string} key - The keyname corresponding to the overlay.
+   */
+  async getOverlayImage(
+    bucket,
+    key,
+    wRatio,
+    hRatio,
+    alpha,
+    sourceImageMetadata
+  ) {
     const s3 = new AWS.S3();
     const params = { Bucket: bucket, Key: key };
     try {
       const { width, height } = sourceImageMetadata;
       const overlayImage = await s3.getObject(params).promise();
       const resize = {
-        fit: 'inside',
+        fit: "inside",
       };
 
       // Set width and height of the watermark image based on the ratio
       const zeroToHundred = /^(100|[1-9]?[0-9])$/;
       if (zeroToHundred.test(wRatio)) {
-        resize.width = parseInt(width * wRatio / 100);
+        resize.width = parseInt((width * wRatio) / 100);
       }
       if (zeroToHundred.test(hRatio)) {
-        resize.height = parseInt(height * hRatio / 100);
+        resize.height = parseInt((height * hRatio) / 100);
       }
 
       // If alpha is not within 0-100, the default alpha is 0 (fully opaque).
@@ -163,16 +187,19 @@ class ImageHandler {
 
       const convertedImage = await sharp(overlayImage.Body)
         .resize(resize)
-        .composite([{
-          input: Buffer.from([255, 255, 255, 255 * (1 - alpha / 100)]),
-          raw: {
-            width: 1,
-            height: 1,
-            channels: 4,
+        .composite([
+          {
+            input: Buffer.from([255, 255, 255, 255 * (1 - alpha / 100)]),
+            raw: {
+              width: 1,
+              height: 1,
+              channels: 4,
+            },
+            tile: true,
+            blend: "dest-in",
           },
-          tile: true,
-          blend: 'dest-in',
-        }]).toBuffer();
+        ])
+        .toBuffer();
       return Promise.resolve(convertedImage);
     } catch (err) {
       return Promise.reject({
@@ -184,36 +211,37 @@ class ImageHandler {
   }
 
   /**
-     * Calculates the crop area for a smart-cropped image based on the bounding
-     * box data returned by Amazon Rekognition, as well as padding options and
-     * the image metadata.
-     * @param {Object} boundingBox - The boudning box of the detected face.
-     * @param {Object} options - Set of options for smart cropping.
-     * @param {Object} metadata - Sharp image metadata.
-     */
+   * Calculates the crop area for a smart-cropped image based on the bounding
+   * box data returned by Amazon Rekognition, as well as padding options and
+   * the image metadata.
+   * @param {Object} boundingBox - The boudning box of the detected face.
+   * @param {Object} options - Set of options for smart cropping.
+   * @param {Object} metadata - Sharp image metadata.
+   */
   getCropArea(boundingBox, options, metadata) {
-    const padding = (options.padding !== undefined) ? parseFloat(options.padding) : 0;
+    const padding =
+      options.padding !== undefined ? parseFloat(options.padding) : 0;
     // Calculate the smart crop area
     const cropArea = {
-      left: parseInt((boundingBox.Left * metadata.width) - padding),
-      top: parseInt((boundingBox.Top * metadata.height) - padding),
-      width: parseInt((boundingBox.Width * metadata.width) + (padding * 2)),
-      height: parseInt((boundingBox.Height * metadata.height) + (padding * 2)),
+      left: parseInt(boundingBox.Left * metadata.width - padding),
+      top: parseInt(boundingBox.Top * metadata.height - padding),
+      width: parseInt(boundingBox.Width * metadata.width + padding * 2),
+      height: parseInt(boundingBox.Height * metadata.height + padding * 2),
     };
     // Return the crop area
     return cropArea;
   }
 
   /**
-     * Gets the bounding box of the specified face index within an image, if specified.
-     * @param {Sharp} imageBuffer - The original image.
-     * @param {Integer} faceIndex - The zero-based face index value, moving from 0 and up as
-     * confidence decreases for detected faces within the image.
-     */
+   * Gets the bounding box of the specified face index within an image, if specified.
+   * @param {Sharp} imageBuffer - The original image.
+   * @param {Integer} faceIndex - The zero-based face index value, moving from 0 and up as
+   * confidence decreases for detected faces within the image.
+   */
   async getBoundingBox(imageBuffer, faceIndex) {
     const rekognition = new AWS.Rekognition();
     const params = { Image: { Bytes: imageBuffer } };
-    const faceIdx = (faceIndex !== undefined) ? faceIndex : 0;
+    const faceIdx = faceIndex !== undefined ? faceIndex : 0;
     try {
       const response = await rekognition.detectFaces(params).promise();
       return Promise.resolve(response.FaceDetails[faceIdx].BoundingBox);
@@ -222,8 +250,9 @@ class ImageHandler {
       if (err.message === "Cannot read property 'BoundingBox' of undefined") {
         return Promise.reject({
           status: 400,
-          code: 'SmartCrop::FaceIndexOutOfRange',
-          message: 'You have provided a FaceIndex value that exceeds the length of the zero-based detectedFaces array. Please specify a value that is in-range.',
+          code: "SmartCrop::FaceIndexOutOfRange",
+          message:
+            "You have provided a FaceIndex value that exceeds the length of the zero-based detectedFaces array. Please specify a value that is in-range.",
         });
       }
       return Promise.reject({

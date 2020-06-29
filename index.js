@@ -11,8 +11,8 @@
  *  and limitations under the License.                                                                                *
  ******************************************************************************************************************** */
 
-const ImageRequest = require('./image-request.js');
-const ImageHandler = require('./image-handler.js');
+const ImageRequest = require("./image-request.js");
+const ImageHandler = require("./image-handler.js");
 
 exports.handler = async (event) => {
   console.log(event);
@@ -24,10 +24,10 @@ exports.handler = async (event) => {
     const processedRequest = await imageHandler.process(request);
 
     const headers = getResponseHeaders();
-    headers['Content-Type'] = request.ContentType;
+    headers["Content-Type"] = request.ContentType;
     headers.Expires = request.Expires;
-    headers['Last-Modified'] = request.LastModified;
-    headers['Cache-Control'] = request.CacheControl;
+    headers["Last-Modified"] = request.LastModified;
+    headers["Cache-Control"] = request.CacheControl;
 
     return {
       statusCode: 200,
@@ -53,17 +53,17 @@ exports.handler = async (event) => {
  * @param {boolean} isErr - has an error been thrown?
  */
 const getResponseHeaders = (isErr) => {
-  const corsEnabled = (process.env.CORS_ENABLED === 'Yes');
+  const corsEnabled = process.env.CORS_ENABLED === "Yes";
   const headers = {
-    'Access-Control-Allow-Methods': 'GET',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Credentials': true,
+    "Access-Control-Allow-Methods": "GET",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Credentials": true,
   };
   if (corsEnabled) {
-    headers['Access-Control-Allow-Origin'] = process.env.CORS_ORIGIN;
+    headers["Access-Control-Allow-Origin"] = process.env.CORS_ORIGIN;
   }
   if (isErr) {
-    headers['Content-Type'] = 'application/json';
+    headers["Content-Type"] = "application/json";
   }
   return headers;
 };
