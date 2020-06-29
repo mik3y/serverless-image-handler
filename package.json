@@ -17,10 +17,13 @@
     "aws-sdk-mock": "^4.4.0",
     "eslint": "^7.3.1",
     "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-mocha": "^7.0.1",
+    "eslint-plugin-prettier": "^3.1.4",
     "mocha": "^6.1.4",
     "nyc": "^14.0.0",
+    "prettier": "^2.0.5",
     "sinon": "^7.3.2"
   },
   "scripts": {
@@ -31,7 +34,8 @@
     "build:dist": "mkdir dist && mv image-handler.zip dist/",
     "build": "npm run build:init && npm install --arch=x64 --platform=linux --production && npm run build:zip && npm run build:dist",
     "lint": "eslint .",
-    "fix-lint": "eslint --fix ."
+    "fix-lint": "eslint --fix .",
+    "format": "prettier --write '**/*.js'"
   },
   "license": "Apache-2.0"
 }

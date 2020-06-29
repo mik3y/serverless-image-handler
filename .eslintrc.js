@@ -7,10 +7,13 @@ module.exports = {
   },
   extends: [
     'airbnb-base',
+    'prettier',
   ],
   rules: {
+    'prettier/prettier': 'error',
   },
   plugins: [
     'mocha',
+    'prettier',
   ],
 };
