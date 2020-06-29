@@ -13,3 +13,4 @@ Major changes:
 * Removed the demo UI.
 * Removed usage metrics reporting.
 * Removed the additional `custom-resource` lambda.
+* Hermetic build of source code zip file using Docker.
