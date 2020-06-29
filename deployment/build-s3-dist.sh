@@ -65,11 +65,3 @@ cd $source_dir/image-handler
 npm install
 npm run build
 cp dist/image-handler.zip $build_dist_dir/image-handler.zip
-
-echo "------------------------------------------------------------------------------"
-echo "Package the custom-resource code"
-echo "------------------------------------------------------------------------------"
-cd $source_dir/custom-resource
-npm install
-npm run build
-cp dist/custom-resource.zip $build_dist_dir/custom-resource.zip
