@@ -6,3 +6,4 @@
 * Removed the demo UI.
 * Removed usage metrics reporting.
 * Removed the additional `custom-resource` lambda.
+* Use `yarn`.
