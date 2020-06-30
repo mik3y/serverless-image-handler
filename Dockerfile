@@ -1,5 +1,7 @@
 FROM lambci/lambda:build-nodejs12.x
 
+VOLUME ["/dist"]
+
 RUN npm install -g yarn
 ADD package.json yarn.lock ./
 RUN yarn install --pure-lockfile --prod
