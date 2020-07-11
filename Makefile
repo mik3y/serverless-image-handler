@@ -6,6 +6,9 @@ DIST_ZIP := $(DIST_DIR)/serverless-image-handler.zip
 builder:
 	docker build -t serverless-image-builder .
 
+test: builder
+	docker run --rm serverless-image-builder sh -c 'yarn install --dev && yarn test'
+
 $(DIST_DIR):
 	mkdir -p $@
 
@@ -15,4 +18,4 @@ $(DIST_ZIP): $(DIST_DIR) builder
 clean:
 	rm -rf $(DIST_DIR)
 
-.PHONY: builder
+.PHONY: builder test
