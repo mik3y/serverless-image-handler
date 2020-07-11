@@ -326,20 +326,10 @@
                 "Role": { "Fn::GetAtt": [ "ImageHandlerFunctionRole", "Arn" ] },
                 "Code": {
                     "S3Bucket": {
-                        "Fn::Join": [
-                            "-",
-                            [
-                                {
-                                    "Fn::FindInMap": [
-                                        "SourceCode",
-                                        "General",
-                                        "S3Bucket"
-                                    ]
-                                },
-                                {
-                                    "Ref": "AWS::Region"
-                                }
-                            ]
+                        "Fn::FindInMap": [
+                            "SourceCode",
+                            "General",
+                            "S3Bucket"
                         ]
                     },
                     "S3Key": {
