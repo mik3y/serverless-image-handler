@@ -313,7 +313,7 @@ class ImageRequest {
    * @param {Object} event - The request body.
    */
   getOutputFormat(event) {
-    const autoWebP = process.env.AUTO_WEBP;
+    const autoWebP = process.env.AUTO_WEBP == "Yes";
     if (
       autoWebP &&
       event.headers.Accept &&

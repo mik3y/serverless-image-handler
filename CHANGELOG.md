@@ -8,4 +8,5 @@
 * Removed the additional `custom-resource` lambda.
 * Use `yarn`.
 * Use `eslint` and `prettier`.
-* Add hermetic build using Docker (`make build/serverless-image-handler.zip`)
+* Add hermetic build using Docker (`make release`)
+* Bugfix: Fixed handling of `AUTO_WEBP` env flag.

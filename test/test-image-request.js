@@ -754,7 +754,7 @@ describe("getOutputFormat()", () => {
     it('Should pass if it returns "webp" for an accepts header which includes webp', () => {
       // Arrange
       process.env = {
-        AUTO_WEBP: true,
+        AUTO_WEBP: "Yes",
       };
       const event = {
         headers: {
@@ -773,7 +773,7 @@ describe("getOutputFormat()", () => {
     it("Should pass if it returns null for an accepts header which does not include webp", () => {
       // Arrange
       process.env = {
-        AUTO_WEBP: true,
+        AUTO_WEBP: "Yes",
       };
       const event = {
         headers: {
@@ -792,7 +792,7 @@ describe("getOutputFormat()", () => {
     it("Should pass if it returns null when AUTO_WEBP is disabled with accepts header including webp", () => {
       // Arrange
       process.env = {
-        AUTO_WEBP: false,
+        AUTO_WEBP: "No",
       };
       const event = {
         headers: {
